@@ -35,6 +35,9 @@ ETAPES
 		à l'intérieur, vont figurer tout les fichiers de test en _spec.rb
 	==> créé un fichier .rspec
 
+	==> NE PAS OUBLIER DE LIER LE FICHIER _spec.rb avec le fichier.rb
+		ex : require_relative '../lib/projet_twitter.rb'
+
 # création d'un dossier lib
 
 # création d'un fichier .rb
