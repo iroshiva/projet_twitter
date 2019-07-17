@@ -8,6 +8,7 @@ Dotenv.load('.env')
 
 def login_twitter
 	client = Twitter::REST::Client.new do |config|
+
 		config.consumer_key        = ENV["TWITTER_CONSUMER_KEY"]
 		config.consumer_secret     = ENV["TWITTER_CONSUMER_SECRET"]
 		config.access_token        = ENV["TWITTER_ACCESS_TOKEN"]
@@ -15,6 +16,19 @@ def login_twitter
 	end
 	return client
 end
+
+
+def login_twitter_stream
+	sclient = Twitter::Streaming::Client.new do |config|
+		config.consumer_key        = ENV["TWITTER_CONSUMER_KEY"]
+		config.consumer_secret     = ENV["TWITTER_CONSUMER_SECRET"]
+		config.access_token        = ENV["TWITTER_ACCESS_TOKEN"]
+		config.access_token_secret = ENV["TWITTER_ACCESS_TOKEN_SECRET"]
+	end
+	return sclient
+end
+
+
 
 # ligne qui permet de tweeter sur ton compte
 def first_tweet(client)
@@ -52,46 +66,53 @@ end
 
 
 
-def tweet_bonj_mond
+def like_tweet_bonj_mond
 	# entrée : les tweets
 	client = login_twitter
-	# client.search("#bonjour_monde")
-	keywords = [‘bonjour‘, ‘monde‘]
-	client.filter(:track => keywords.join(“,“), result_type: "recent").take(25) do |tweet|
-		if tweet.is_a?(Twitter::Tweet)
-			# puts “#{object.id} #{object.user.screen_name} – #{object.text}“
-			# puts “———————————————“
-			# end
-			client.fav tweet
-		end
-		# action : trouver les tweets qui affichent #bonjour_monde
+	
+	client.search("#bonjour_monde", result_type: "recent").take(25).collect do |tweet|
+	# action : trouver les tweets qui affichent #bonjour_monde
+
+	    client.favorite(tweet)
 		# sortie : au moins 25 tweets qui ont #bonjour_monde
-
-
-
-		# def like_hello
-		#    @client.search("#{@hashtbonjour}", result_type: "recent").take(25).collect do |tweet|
-		#      @client.favorite(tweet)
-		#    end
-		#  end
 	end
+end
 
 
-	tweet_bonj_mond
+	# like_tweet_bonj_mond
 
-	# def like_tweet_bon_mond()
-	# entrée : résultat de la méthode tweet_bonj_mond
-	# action : like chacun des tweet bonjour_monde
-	# sortie : tweets likés
-	# end
+def tweet_follow_bonj_mond
+	client = login_twitter
+	client.search("#bonjour_monde", result_type: "recent").take(20).collect do |tweet|
+	# cherche tous les tweets récent, au moins 20
+
+	    client.follow(tweet.user)
+	    # .follow == follow    tweet.user == les tweets des utilisateurs cherchés
+	end
+end
+
+# tweet_follow_bonj_mond
 
 
-	# def perform_follow_bonjour
-	# méthode qui like les derniers tweet avec le #bonjour_monde
-	# entrée : tous les tweets
-	# action :
-	# chercher les tweet qui ont #bonjour_monde
-	# Pour chacun de ces tweets ==> liker
-	# sortie ==> les tweets #bonjour_monde likés
+def lik_follo_in_live
 
-	# end
+	client = login_twitter
+	# client va liker et follower
+
+	sclient = login_twitter_stream
+	# sclient va rafraîchir la page en boucle
+
+	sclient.filter(:track => "#bonjour_monde") do |tweet|
+	# détecter les nouveaux tweets avec #bonjour_monde
+	# .filter == .search en mode STREAMING associé à :track
+
+	client.favorite(tweet)
+	# les liker
+
+	client.follow(tweet.user)
+	# les follower
+
+	end
+end
+
+lik_follo_in_live
